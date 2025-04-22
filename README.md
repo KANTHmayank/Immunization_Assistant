@@ -55,7 +55,6 @@ Immunization_Assistant/ ├── app.py # Streamlit UI and RAG query logic ├�
 
 APP SCREENSHOTS
 
-![Screenshot (147)](https://github.com/user-attachments/assets/72b5318c-0fc5-4a3d-9510-d38c08289ec5)
 ![Screenshot (148)](https://github.com/user-attachments/assets/38aa88b8-e7f5-490d-a5b9-dfc23a24b150)
 ![Screenshot (149)](https://github.com/user-attachments/assets/f8ab11fc-b645-4752-8359-4f686892b3eb)
 
