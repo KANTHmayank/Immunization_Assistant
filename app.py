@@ -3,6 +3,7 @@ import pickle
 import faiss
 import openai
 import numpy as np
+import re
 
 # — Setup —
 st.set_page_config(page_title="Smart Immunization Assistant")
@@ -71,10 +72,50 @@ def rag_answer(q):
         st.error(f"Error generating answer: {e}")
         return "Sorry, I couldn't generate an answer at this time."
 
-# — UI —
-q = st.text_input("Ask your vaccine question (e.g. “My baby is 6 weeks old—what vaccines?”):")
+def general_medical_answer(q):
+    resp = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system",
+             "content": (
+                 "You are a knowledgeable medical‐information assistant. "
+                 "You may provide general treatment options and medicines, "
+                 "but include a disclaimer to consult a professional whenever necessary."
+             )},
+            {"role": "user", "content": q}
+        ],
+        temperature=0.7,
+        max_tokens=200
+    )
+    return resp.choices[0].message.content.strip()
+
+
+domain_keywords = ["vaccine", "vaccination", "immunization", "immunisation",
+    "nip", "iap", "dose", "booster",
+    "antibody", "antigen", "adjuvant",
+    "injection", "shot", "schedule", "due", "when",
+    "side effect", "ae", "safety", "efficacy"]
+
+def is_vaccine_query(query: str) -> bool:
+    q = query.lower()
+    # exact keyword or whole-word match
+    for kw in domain_keywords:
+        if re.search(rf"\b{re.escape(kw)}\b", q):
+            return True
+    return False
+
+
+# — Streamlit UI —
+q = st.text_input("Ask a question about vaccines or general medical topics:")
 
 if st.button("Get Answer") and q:
-    with st.spinner("Looking up your answer…"):
+    
+    if is_vaccine_query(q):
         answer = rag_answer(q)
+
+   
+    else:
+        # Out of scope → fallback to general medical GPT
+        answer = general_medical_answer(q)
+
     st.markdown(answer)
